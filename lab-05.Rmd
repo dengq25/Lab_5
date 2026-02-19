@@ -1,7 +1,7 @@
 ---
 title: "Lab 05 - La Quinta is Spanish for next to Denny's, Pt. 2"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Cynthia Deng"
+date: "2/18/2026"
 output: github_document
 ---
 
@@ -20,32 +20,194 @@ laquinta <- read_csv("data/laquinta.csv")
 
 ### Exercise 1
 
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
-
+```{r}
+dn_ak <- dennys %>%
+  filter(state == "AK")
+nrow(dn_ak)
+```
+```{r}
+lq_ak <- laquinta %>%
+  filter(state == "AK")
+nrow(lq_ak)
+```
+There are 3 Denny's and 2 La Quinta in Alaska.
 ### Exercise 2
-
-Remove this text, and add your answer for Exercise 1 here.
-Add code chunks as needed.
-Don't forget to label your code chunk.
-Do not use spaces in code chunk labels.
-
+```{r}
+nrow(dn_ak) * nrow(lq_ak)
+```
+There are 6 pairs that we can calculate the distance for
 ### Exercise 3
 
-...
+```{r}
+dn_lq_ak <- full_join(dn_ak, lq_ak,
+  by = "state"
+)
+```
 
 ### Exercise 4
+```{r}
+nrow(dn_lq_ak)
+```
 
-...
+The combined data frame has 6 observations.
 
 ### Exercise 5
+```{r}
+haversine <- function(long1, lat1, long2, lat2, round = 3) {
+  # convert to radians
+  long1 <- long1 * pi / 180
+  lat1 <- lat1 * pi / 180
+  long2 <- long2 * pi / 180
+  lat2 <- lat2 * pi / 180
 
-...
+  R <- 6371 # Earth mean radius in km
+
+  a <- sin((lat2 - lat1) / 2)^2 + cos(lat1) * cos(lat2) * sin((long2 - long1) / 2)^2
+  d <- R * 2 * asin(sqrt(a))
+
+  return(round(d, round)) # distance in km
+}
+```
+
 
 ### Exercise 6
+```{r}
+dn_lq_ak <- dn_lq_ak %>%
+  mutate(distance = haversine(
+    longitude.x, latitude.x, 
+    longitude.y, latitude.y))
+```
 
-...
 
-Add exercise headings as needed.
+### Ecercise 7
+```{r}
+dn_min_dist_ak <- dn_lq_ak %>%
+  group_by(address.x) %>%
+  summarize(min_distance = min(distance), .groups = "drop")
+
+dn_min_dist_ak
+
+```
+
+###Exercise 8
+```{r}
+ggplot(dn_min_dist_ak, aes(x = "", y = min_distance)) +
+  geom_jitter(width = 0.05, size = 3) +
+  labs(
+    title = "Nearest La Quinta Distance for Each Alaska Denny's",
+    x = "",
+    y = "Distance (km)"
+  )
+
+```
+
+The distances between each Denny’s and its nearest La Quinta in Alaska range from approximately 1.8 km to 6.1 km.
+
+### Exercise 9
+```{r}
+dn_nc <- dennys %>% filter(state == "NC")
+lq_nc <- laquinta %>% filter(state == "NC")
+dn_lq_nc <- full_join(dn_nc, lq_nc, by = "state")
+
+dn_lq_nc <- dn_lq_nc %>%
+  mutate(distance = haversine(
+    longitude.x, latitude.x, 
+    longitude.y, latitude.y))
+
+dn_min_dist_nc <- dn_lq_nc %>%
+  group_by(address.x) %>%
+  summarize(min_distance = min(distance), .groups = "drop")
+
+dn_min_dist_nc
+
+ggplot(dn_min_dist_nc, aes(x = "", y = min_distance)) +
+  geom_jitter(width = 0.05, size = 3) +
+  labs(
+    title = "Nearest La Quinta Distance for Each North Carolina Denny's",
+    x = "",
+    y = "Distance (km)"
+  )
+```
+
+### Exercise 10
+```{r}
+dn_tx <- dennys %>% filter(state == "TX")
+lq_tx <- laquinta %>% filter(state == "TX")
+dn_lq_tx <- full_join(dn_tx, lq_tx, by = "state")
+
+dn_lq_tx <- dn_lq_tx %>%
+  mutate(distance = haversine(
+    longitude.x, latitude.x, 
+    longitude.y, latitude.y))
+
+dn_min_dist_tx <- dn_lq_tx %>%
+  group_by(address.x) %>%
+  summarize(min_distance = min(distance), .groups = "drop")
+
+dn_min_dist_tx
+
+ggplot(dn_min_dist_tx, aes(x = "", y = min_distance)) +
+  geom_jitter(width = 0.05, size = 3) +
+  labs(
+    title = "Nearest La Quinta Distance for Each Texas Denny's",
+    x = "",
+    y = "Distance (km)"
+  )
+```
+
+### Exerse 11
+```{r}
+dn_ca <- dennys %>% filter(state == "CA")
+lq_ca <- laquinta %>% filter(state == "CA")
+dn_lq_ca <- full_join(dn_ca, lq_ca, by = "state")
+
+dn_lq_ca <- dn_lq_ca %>%
+  mutate(distance = haversine(
+    longitude.x, latitude.x, 
+    longitude.y, latitude.y))
+
+dn_min_dist_ca <- dn_lq_ca %>%
+  group_by(address.x) %>%
+  summarize(min_distance = min(distance), .groups = "drop")
+
+dn_min_dist_ca
+
+ggplot(dn_min_dist_ca, aes(x = "", y = min_distance)) +
+  geom_jitter(width = 0.05, size = 3) +
+  labs(
+    title = "Nearest La Quinta Distance for Each California Denny's",
+    x = "",
+    y = "Distance (km)"
+  )
+```
+### Exercise 12
+```{r}
+dn_min_dist_ak <- dn_min_dist_ak %>%
+  mutate(state = "AK")
+
+dn_min_dist_tx <- dn_min_dist_tx %>%
+  mutate(state = "TX")
+
+dn_min_dist_ca <- dn_min_dist_ca %>%
+  mutate(state = "CA")
+
+dn_min_all <- bind_rows(
+  dn_min_dist_ak,
+  dn_min_dist_tx,
+  dn_min_dist_ca
+)
+
+dn_min_all %>%
+  group_by(state) %>%
+  summarize(
+    mean_distance   = mean(min_distance),
+    median_distance = median(min_distance),
+    min_distance    = min(min_distance),
+    max_distance    = max(min_distance),
+    .groups = "drop"
+  )
+
+
+```
+
+Mitch Hedberg’s joke is most likely to hold true in Texas. Texas has the smallest typical nearest distance between a Denny’s and the nearest La Quinta, based on the median distance (about 3.37 km). Alaska’s median is larger (about 5.20 km). California is least consistent with the joke because its distances are much larger overall, especially the mean (about 22.08 km) and median (about 11.90 km)
